@@ -38,9 +38,16 @@ async function run() {
     const addedFoodCollection = client.db('ShareAbite').collection('addedFoodCollection');
 
 
+    // post a food on collection api -------------------->>>>>
     app.post('/addFood',async(req,res)=>{
         const data = req.body;
         const result = await addedFoodCollection.insertOne(data)
+        res.send(result)
+    })
+
+    // get all food api -------------------------------->>>>>
+    app.get('/getFoods',async(req,res)=>{
+        const result = await addedFoodCollection.find({}).toArray()
         res.send(result)
     })
 
