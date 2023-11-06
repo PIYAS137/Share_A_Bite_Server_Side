@@ -163,6 +163,27 @@ async function run() {
 
     })
 
+    // get single full all requests datas---------->>>>>
+    app.get('/manageSingle/:sid',async(req,res)=>{
+      const id = req.params.sid;
+      const filter = {requset_food_id : id}
+      const result = await requestCollection.find(filter).toArray()
+      res.send(result)
+    })
+
+    // update requested food status when delevered-->>>>>
+    app.patch('/deleverFood/:sid',async(req,res)=>{
+      const id = req.params.sid;
+      const query = {_id : new ObjectId(id)}
+      const updatedDoc = {
+        $set:{
+          isDelevered : true
+        }
+      }
+      const result = await requestCollection.updateOne(query,updatedDoc)
+      res.send(result)
+    })
+
 
 
 
