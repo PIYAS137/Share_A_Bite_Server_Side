@@ -71,11 +71,21 @@ async function run() {
       if (exist) {
         res.send("Already Added")
       } else {
+        // if this is my food then res.send("This is your food !")
         const result = await requestCollection.insertOne(data)
         res.send(result)
       }
     })
 
+    // get user request foods api----------------------->>>>>
+    app.get('/getUserReqFood',async(req,res)=>{
+      let query = {}
+      if(req.query?.email){
+        query = {requester_email : req.query.email}
+      }
+      const result = await requestCollection.find(query).toArray()
+      res.send(result)
+    })
 
 
 
