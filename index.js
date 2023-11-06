@@ -120,7 +120,47 @@ async function run() {
           res.send(result)
         }
       }
-      // res.send(result)
+    })
+
+    // update one food api------------------------->>>>>
+    app.patch('/updateFood/:sid',async(req,res)=>{
+      const id = req.params.sid;
+      const data = req.body;
+      
+      const filter = {_id : new ObjectId(id)}
+      const updatedDocument={
+        $set:{
+          food_name : data.food_name,
+          food_img  : data.food_img,
+          pickup_location : data.pickup_location,
+          expire_date : data.expire_date,
+          food_status : data.updateFood_status,
+          food_quantity : data.food_quantity,
+          additional_info : data.additional_info
+        }
+      }
+      const result = await addedFoodCollection.updateOne(filter,updatedDocument)
+      if(result.modifiedCount==1){
+        const reqQuery = {requset_food_id :id}
+        const exist = await requestCollection.findOne(reqQuery)
+        if(exist){
+
+          const reqUpdatedDoc = {
+            $set:{
+              food_name : data.food_name,
+              food_img  : data.food_img,
+              pickup_location : data.pickup_location,
+              food_expire_date : data.expire_date,
+              food_status : data.updateFood_status,
+            }
+          }
+          const finalResult = await requestCollection.updateOne(reqQuery,reqUpdatedDoc)
+          res.send(finalResult)
+        }else{
+          res.send(result)
+        }
+      }
+
     })
 
 
