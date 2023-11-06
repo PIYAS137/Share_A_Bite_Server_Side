@@ -8,8 +8,8 @@ const port = process.env.PORT || 5020;
 
 // middlewares-------------------------------------------------------------------------------------------->>>>>
 app.use(cors({
-    origin:["http://localhost:5173"],
-    credentials:true
+  origin: ["http://localhost:5173"],
+  credentials: true
 }))
 app.use(express.json())
 require('dotenv').config()
@@ -18,7 +18,7 @@ require('dotenv').config()
 
 // ----------------------------------------------------MongoDB-------------------------------------------->>>>>
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.frg7rqf.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -36,20 +36,46 @@ async function run() {
     await client.connect();
 
     const addedFoodCollection = client.db('ShareAbite').collection('addedFoodCollection');
+    const requestCollection = client.db('ShareAbite').collection('requestFoodCollection');
 
 
     // post a food on collection api -------------------->>>>>
-    app.post('/addFood',async(req,res)=>{
-        const data = req.body;
-        const result = await addedFoodCollection.insertOne(data)
-        res.send(result)
+    app.post('/addFood', async (req, res) => {
+      const data = req.body;
+      const result = await addedFoodCollection.insertOne(data)
+      res.send(result)
     })
 
     // get all food api -------------------------------->>>>>
-    app.get('/getFoods',async(req,res)=>{
-        const result = await addedFoodCollection.find({}).toArray()
-        res.send(result)
+    app.get('/getFoods', async (req, res) => {
+      const result = await addedFoodCollection.find({}).toArray()
+      res.send(result)
     })
+
+    // get one food api -------------------------------->>>>>
+    app.get('/getFoods/:sid', async (req, res) => {
+      const id = req.params.sid;
+      const query = { _id: new ObjectId(id) }
+      const result = await addedFoodCollection.findOne(query)
+      res.send(result)
+    })
+
+    // put request to request collection--------------->>>>>
+    app.put('/putReq', async (req, res) => {
+      const data = req.body;
+      console.log(data);
+      const query = { requset_food_id: data.requset_food_id, requester_email: data.requester_email }
+
+      const exist = await requestCollection.findOne(query)
+
+      if (exist) {
+        res.send("Already Added")
+      } else {
+        const result = await requestCollection.insertOne(data)
+        res.send(result)
+      }
+    })
+
 
 
 
@@ -86,12 +112,12 @@ run().catch(console.dir);
 
 
 
-app.get('/',(req,res)=>{
-    res.send("Server is coming soon...");
+app.get('/', (req, res) => {
+  res.send("Server is coming soon...");
 })
 
 
 
-app.listen(port,()=>{
-    console.log(`Server is running on http://localhost:${port}`);
+app.listen(port, () => {
+  console.log(`Server is running on http://localhost:${port}`);
 })
