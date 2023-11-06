@@ -87,6 +87,14 @@ async function run() {
       res.send(result)
     })
 
+    // delete food request api------------------------->>>>>
+    app.delete('/reqDelete/:sid',async(req,res)=>{
+      const id = req.params.sid
+      const query = {_id : new ObjectId(id)}
+      const result = await requestCollection.deleteOne(query)
+      res.send(result)
+    })
+
 
 
 
