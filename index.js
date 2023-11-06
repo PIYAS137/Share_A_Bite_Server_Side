@@ -18,7 +18,7 @@ require('dotenv').config()
 
 // ----------------------------------------------------MongoDB-------------------------------------------->>>>>
 
-const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId, ConnectionPoolMonitoringEvent } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.frg7rqf.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -78,23 +78,50 @@ async function run() {
     })
 
     // get user request foods api----------------------->>>>>
-    app.get('/getUserReqFood',async(req,res)=>{
+    app.get('/getUserReqFood', async (req, res) => {
       let query = {}
-      if(req.query?.email){
-        query = {requester_email : req.query.email}
+      if (req.query?.email) {
+        query = { requester_email: req.query.email }
       }
       const result = await requestCollection.find(query).toArray()
       res.send(result)
     })
 
     // delete food request api------------------------->>>>>
-    app.delete('/reqDelete/:sid',async(req,res)=>{
+    app.delete('/reqDelete/:sid', async (req, res) => {
       const id = req.params.sid
-      const query = {_id : new ObjectId(id)}
+      const query = { _id: new ObjectId(id) }
       const result = await requestCollection.deleteOne(query)
       res.send(result)
     })
 
+    // get my added foods----------------------------->>>>>
+    app.get('/myaddedFoods', async (req, res) => {
+      let query = {}
+      if (req.query?.email) {
+        query = { donar_email: req.query.email }
+      }
+      const result = await addedFoodCollection.find(query).toArray()
+      res.send(result)
+    })
+
+    // delete data one food from manage food--------->>>>>
+    app.delete('/manageDelete/:sid', async (req, res) => {
+      const id = req.params.sid;
+      const query = { _id: new ObjectId(id) }
+      const result = await addedFoodCollection.deleteOne(query)
+      if (result.deletedCount === 1) {
+        const reqFilter = { requset_food_id: id }
+        const exist = await requestCollection.findOne(reqFilter)
+        if (exist) {
+          const finalResult = await requestCollection.deleteOne(reqFilter)
+          res.send(finalResult)
+        } else {
+          res.send(result)
+        }
+      }
+      // res.send(result)
+    })
 
 
 
