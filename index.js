@@ -48,7 +48,7 @@ async function run() {
 
     // get all food api -------------------------------->>>>>
     app.get('/getFoods', async (req, res) => {
-      const result = await addedFoodCollection.find({}).sort({expire_date:1}).toArray()
+      const result = await addedFoodCollection.find({}).sort({ expire_date: 1 }).toArray()
       res.send(result)
     })
 
@@ -123,40 +123,40 @@ async function run() {
     })
 
     // update one food api------------------------->>>>>
-    app.patch('/updateFood/:sid',async(req,res)=>{
+    app.patch('/updateFood/:sid', async (req, res) => {
       const id = req.params.sid;
       const data = req.body;
-      
-      const filter = {_id : new ObjectId(id)}
-      const updatedDocument={
-        $set:{
-          food_name : data.food_name,
-          food_img  : data.food_img,
-          pickup_location : data.pickup_location,
-          expire_date : data.expire_date,
-          food_status : data.updateFood_status,
-          food_quantity : data.food_quantity,
-          additional_info : data.additional_info
+
+      const filter = { _id: new ObjectId(id) }
+      const updatedDocument = {
+        $set: {
+          food_name: data.food_name,
+          food_img: data.food_img,
+          pickup_location: data.pickup_location,
+          expire_date: data.expire_date,
+          food_status: data.updateFood_status,
+          food_quantity: data.food_quantity,
+          additional_info: data.additional_info
         }
       }
-      const result = await addedFoodCollection.updateOne(filter,updatedDocument)
-      if(result.modifiedCount==1){
-        const reqQuery = {requset_food_id :id}
+      const result = await addedFoodCollection.updateOne(filter, updatedDocument)
+      if (result.modifiedCount == 1) {
+        const reqQuery = { requset_food_id: id }
         const exist = await requestCollection.findOne(reqQuery)
-        if(exist){
+        if (exist) {
 
           const reqUpdatedDoc = {
-            $set:{
-              food_name : data.food_name,
-              food_img  : data.food_img,
-              pickup_location : data.pickup_location,
-              food_expire_date : data.expire_date,
-              food_status : data.updateFood_status,
+            $set: {
+              food_name: data.food_name,
+              food_img: data.food_img,
+              pickup_location: data.pickup_location,
+              food_expire_date: data.expire_date,
+              food_status: data.updateFood_status,
             }
           }
-          const finalResult = await requestCollection.updateOne(reqQuery,reqUpdatedDoc)
+          const finalResult = await requestCollection.updateOne(reqQuery, reqUpdatedDoc)
           res.send(finalResult)
-        }else{
+        } else {
           res.send(result)
         }
       }
@@ -164,29 +164,34 @@ async function run() {
     })
 
     // get single full all requests datas---------->>>>>
-    app.get('/manageSingle/:sid',async(req,res)=>{
+    app.get('/manageSingle/:sid', async (req, res) => {
       const id = req.params.sid;
-      const filter = {requset_food_id : id}
+      const filter = { requset_food_id: id }
       const result = await requestCollection.find(filter).toArray()
       res.send(result)
     })
 
     // update requested food status when delevered-->>>>>
-    app.patch('/deleverFood/:sid',async(req,res)=>{
+    app.patch('/deleverFood/:sid', async (req, res) => {
       const id = req.params.sid;
-      const query = {_id : new ObjectId(id)}
+      const data = req.body;
+      const query = { _id: new ObjectId(id) }
       const updatedDoc = {
-        $set:{
-          isDelevered : true
+        $set: {
+          isDelevered: true
         }
       }
-      const result = await requestCollection.updateOne(query,updatedDoc)
-      res.send(result)
+      const result = await requestCollection.updateOne(query, updatedDoc)
+      if (result.modifiedCount == 1) {
+        const finalQuery = { _id: new ObjectId(data.requset_food_id) }
+        const finalResultX = await addedFoodCollection.deleteOne(finalQuery)
+        res.send(finalResultX)
+      }
     })
 
     // create api for featured section of homepage----->>>>>
-    app.get('/featuredSecFood',async(req,res)=>{
-      const result = await addedFoodCollection.find({}).sort({food_quantity:-1 }).toArray()
+    app.get('/featuredSecFood', async (req, res) => {
+      const result = await addedFoodCollection.find({}).sort({ food_quantity: -1 }).toArray()
       res.send(result)
     })
 
