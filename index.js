@@ -48,7 +48,7 @@ async function run() {
 
     // get all food api -------------------------------->>>>>
     app.get('/getFoods', async (req, res) => {
-      const result = await addedFoodCollection.find({}).toArray()
+      const result = await addedFoodCollection.find({}).sort({expire_date:1}).toArray()
       res.send(result)
     })
 
@@ -184,17 +184,11 @@ async function run() {
       res.send(result)
     })
 
-
-
-
-
-
-
-
-
-
-
-
+    // create api for featured section of homepage----->>>>>
+    app.get('/featuredSecFood',async(req,res)=>{
+      const result = await addedFoodCollection.find({}).sort({food_quantity:-1 }).toArray()
+      res.send(result)
+    })
 
 
 
