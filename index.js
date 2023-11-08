@@ -1,4 +1,4 @@
-
+const { MongoClient, ServerApiVersion, ObjectId, ConnectionPoolMonitoringEvent } = require('mongodb');
 const express = require('express');
 const cors = require('cors');
 const app = express();
@@ -7,14 +7,14 @@ var jwt = require('jsonwebtoken');
 var cookieParser = require('cookie-parser')
 
 
+require('dotenv').config()
 
 // middlewares-------------------------------------------------------------------------------------------->>>>>
 app.use(cors({
-  origin: ["http://localhost:5173"],
+  origin: ['https://share-a-bite-b0bdb.web.app','https://share-a-bite-b0bdb.firebaseapp.com','https://share-a-bite-b0bdb.web.app','http://localhost:5173'],
   credentials: true
 }))
 app.use(express.json())
-require('dotenv').config()
 app.use(cookieParser())
 
 // --------------custom middleware------------------->>>>>
@@ -37,7 +37,6 @@ const verifyToken = (req, res, next) => {
 
 // ----------------------------------------------------MongoDB-------------------------------------------->>>>>
 
-const { MongoClient, ServerApiVersion, ObjectId, ConnectionPoolMonitoringEvent } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.frg7rqf.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -64,14 +63,14 @@ async function run() {
       res
         .cookie('token', token, {
           httpOnly: true,
-          sameSite: 'none',
+          sameSite:'none',
           secure: true
         })
         .send({ status: true })
     })
 
     app.post('/logOut', async (req, res) => {
-      const data = req.body;
+      const data = req.body
       res.clearCookie('token', { maxAge: 0 }).send({ status: true })
     })
     // ------------------>>>> J W T <<<<----------------------
