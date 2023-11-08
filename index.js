@@ -3,6 +3,8 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 const port = process.env.PORT || 5020;
+var jwt = require('jsonwebtoken');
+var cookieParser = require('cookie-parser')
 
 
 
@@ -13,6 +15,23 @@ app.use(cors({
 }))
 app.use(express.json())
 require('dotenv').config()
+app.use(cookieParser())
+
+// --------------custom middleware------------------->>>>>
+const verifyToken = (req, res, next) => {
+  const token = req?.cookies?.token;
+  if (!token) {
+    return res.status(401).send({ message: "Unauthorized" })
+  }
+  jwt.verify(token, process.env.TOKEN_SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(401).send({ message: "Unauthorized" })
+    }
+    req.userWhoWantData = decoded;
+    next()
+  })
+}
+// --------------custom middleware------------------->>>>> 
 // middlewares-------------------------------------------------------------------------------------------->>>>>
 
 
@@ -37,6 +56,25 @@ async function run() {
 
     const addedFoodCollection = client.db('ShareAbite').collection('addedFoodCollection');
     const requestCollection = client.db('ShareAbite').collection('requestFoodCollection');
+
+    // ------------------>>>> J W T <<<<----------------------
+    app.post('/jwt', async (req, res) => {
+      const data = req.body;
+      const token = jwt.sign(data, process.env.TOKEN_SECRET, { expiresIn: '1hr' })
+      res
+        .cookie('token', token, {
+          httpOnly: true,
+          sameSite: 'none',
+          secure: true
+        })
+        .send({ status: true })
+    })
+
+    app.post('/logOut', async (req, res) => {
+      const data = req.body;
+      res.clearCookie('token', { maxAge: 0 }).send({ status: true })
+    })
+    // ------------------>>>> J W T <<<<----------------------
 
 
     // post a food on collection api -------------------->>>>>
@@ -77,11 +115,14 @@ async function run() {
       }
     })
 
-    // get user request foods api----------------------->>>>>
-    app.get('/getUserReqFood', async (req, res) => {
+    // get user request foods api----------------------->>>>> SECURED API
+    app.get('/getUserReqFood',verifyToken, async (req, res) => {
       let query = {}
       if (req.query?.email) {
         query = { requester_email: req.query.email }
+      }
+      if(req?.userWhoWantData?.email !== req.query?.email){
+        return res.status(403).send({message : "Forbidden"})
       }
       const result = await requestCollection.find(query).toArray()
       res.send(result)
@@ -95,11 +136,14 @@ async function run() {
       res.send(result)
     })
 
-    // get my added foods----------------------------->>>>>
-    app.get('/myaddedFoods', async (req, res) => {
+    // get my added foods----------------------------->>>>> SECURED API
+    app.get('/myaddedFoods',verifyToken, async (req, res) => {
       let query = {}
       if (req.query?.email) {
         query = { donar_email: req.query.email }
+      }
+      if(req.userWhoWantData?.email !== req.query?.email){
+        return res.status(403).send({message : "Forbidden"})
       }
       const result = await addedFoodCollection.find(query).toArray()
       res.send(result)
