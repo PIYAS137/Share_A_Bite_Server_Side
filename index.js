@@ -69,9 +69,21 @@ async function run() {
         .send({ status: true })
     })
 
+// Logout
+// app.post('/logout', async (req, res) => {
+//   const user = req.body;
+//   console.log('logging out', user);
+//   res
+//   .clearCookie('token', { maxAge: 0, sameSite: 'none', secure: true })
+//   .send({ success: true })
+//   })
+
+
+
     app.post('/logOut', async (req, res) => {
       const data = req.body
-      res.clearCookie('token', { maxAge: 0 }).send({ status: true })
+      console.log("Ok",data);
+      res.clearCookie('token', { maxAge: 0,sameSite:'none',secure:true }).send({ status: true })
     })
     // ------------------>>>> J W T <<<<----------------------
 
