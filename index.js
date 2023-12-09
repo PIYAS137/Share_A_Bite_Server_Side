@@ -51,7 +51,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
 
     const addedFoodCollection = client.db('ShareAbite').collection('addedFoodCollection');
     const requestCollection = client.db('ShareAbite').collection('requestFoodCollection');
@@ -68,16 +68,6 @@ async function run() {
         })
         .send({ status: true })
     })
-
-// Logout
-// app.post('/logout', async (req, res) => {
-//   const user = req.body;
-//   console.log('logging out', user);
-//   res
-//   .clearCookie('token', { maxAge: 0, sameSite: 'none', secure: true })
-//   .send({ success: true })
-//   })
-
 
 
     app.post('/logOut', async (req, res) => {
@@ -255,8 +245,8 @@ async function run() {
 
 
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+    // await client.db("admin").command({ ping: 1 });
+    // console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
@@ -273,7 +263,7 @@ run().catch(console.dir);
 
 
 app.get('/', (req, res) => {
-  res.send("Server is coming soon...");
+  res.send("Share A Bite Server is running...");
 })
 
 
